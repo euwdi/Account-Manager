@@ -1,16 +1,18 @@
 <template>
   <main>
     <div class="container">
-      <h1>Удобно управляйте учетными записями!</h1>
+      <AccountsPage />
     </div>
   </main>
 </template>
 
 <script setup lang="ts">
+import AccountsPage from './pages/AccountsPage.vue';
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .container {
   display: flex;
+  padding: 50px;
 }
 </style>
