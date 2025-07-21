@@ -10,8 +10,3 @@ export type Account = {
 export type LabelItem = {
   text: string
 }
-
-export const accountSelectTypes = [
-  { title: 'LDAP', value: 'ldap' },
-  { title: 'Локальная', value: 'local' },
-]

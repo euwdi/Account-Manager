@@ -13,26 +13,35 @@ export const useAccountsStore = defineStore('accounts', () => {
   function saveToLocalStorage() {
     localStorage.setItem(
       'accounts',
-      JSON.stringify(accounts.value.filter((account) => account.isValidate)),
+      JSON.stringify(accounts.value.filter((account) => account.isValidate))
     )
   }
 
   function addAccount() {
-    let id: number
-    if (accounts.value.length > 0) {
-      id = accounts.value[accounts.value.length - 1].id + 1
-    } else id = 1
-    accounts.value.push({ id, labels: [], type: 'local', login: '', password: '', isValidate: false })
+    const lastElement = accounts.value.at(-1)
+    accounts.value.push({
+      id: lastElement ? lastElement.id + 1 : 1,
+      labels: [],
+      type: 'local',
+      login: '',
+      password: '',
+      isValidate: false
+    })
   }
 
   function updateAccount(newAccount: Account) {
-    const index = accounts.value.findIndex((account) => (account.id = newAccount.id))
-    if (index > -1 && validateAccount(newAccount)) {
-      accounts.value[index] = newAccount
-      saveToLocalStorage()
-    } else {
-      console.error('Аккаунта с таким id не существует')
+    if (!validateAccount(newAccount)) {
+      return
     }
+
+    const index = accounts.value.findIndex((account) => (account.id === newAccount.id))
+    if (index === -1) {
+      console.error('Аккаунта с таким id не существует')
+      return
+    }
+
+    accounts.value[index] = {...newAccount}
+    saveToLocalStorage()
   }
 
   function deleteAccount(id: number) {
@@ -75,6 +84,6 @@ export const useAccountsStore = defineStore('accounts', () => {
     loadFromLocalStorage,
     getLabelErrors,
     getLoginErrors,
-    getPasswordErrors,
+    getPasswordErrors
   }
 })

@@ -13,7 +13,7 @@
         v-model="account.type"
         label="Тип записи"
         :items="accountSelectTypes"
-        @update:model-value="updateAccount(account)"
+        @update:model-value="emit('update', account)"
       />
       <v-text-field
         v-model="account.login"
@@ -22,7 +22,6 @@
         :error-messages="errors.login"
         @blur="onBlur('login')"
       />
-      ff
       <v-text-field
         v-model="account.password"
         label="Пароль"
@@ -33,7 +32,7 @@
         @blur="onBlur('password')"
       />
       <v-btn
-        @click="deleteAccount"
+        @click="emit('delete', account.id)"
         icon="mdi-delete"
       />
     </v-row>
@@ -42,8 +41,7 @@
 
 <script setup lang="ts">
   import { ref } from 'vue'
-  import type { Account, accountSelectTypes } from '@/types'
-  import { useAccountsStore } from '@/stores/accounts'
+  import type { Account } from '@/types'
 
   const props = defineProps<{
     account: Account
@@ -53,8 +51,6 @@
     (e: 'update', data: Account): void
     (e: 'delete', id: number): void
   }>()
-
-  const { getLabelErrors, getLoginErrors, getPasswordErrors, updateAccount } = useAccountsStore()
 
   const account = ref<Account>(props.account)
   const labelInput = ref<string>(account.value.labels.map((label) => label.text).join('; '))
@@ -80,7 +76,7 @@
     if (field === 'labels') parseLabel()
 
     touchedInputs.value[field] = true
-    updateAccount(account.value)
+    emit('update', account.value)
   }
 
   function parseLabel() {
@@ -90,7 +86,8 @@
       .map((label) => ({ text: label.trim() }))
   }
 
-  function deleteAccount() {
-    emit('delete', account.value.id)
-  }
+  const accountSelectTypes = [
+    { title: 'LDAP', value: 'ldap' },
+    { title: 'Локальная', value: 'local' }
+  ]
 </script>
