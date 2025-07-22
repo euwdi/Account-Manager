@@ -1,40 +1,68 @@
 <template>
-  <v-card>
-    <v-row>
-      <v-text-field
-        v-model="labelInput"
-        label="Метка"
-        :hint="'Введите метки через точку с запятой (максимум 50 символов)'"
-        persistent-hint
-        :error-messages="errors.labels"
-        @blur="onBlur('labels')"
-      />
-      <v-select
-        v-model="account.type"
-        label="Тип записи"
-        :items="accountSelectTypes"
-        @update:model-value="emit('update', account)"
-      />
-      <v-text-field
-        v-model="account.login"
-        label="Логин"
-        :counter="100"
-        :error-messages="errors.login"
-        @blur="onBlur('login')"
-      />
-      <v-text-field
-        v-model="account.password"
-        label="Пароль"
-        :type="showPassword ? 'text' : 'password'"
-        :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-        @click:append-inner="showPassword = !showPassword"
-        :error-messages="errors.password"
-        @blur="onBlur('password')"
-      />
-      <v-btn
-        @click="emit('delete', account.id)"
-        icon="mdi-delete"
-      />
+  <v-card flat>
+    <v-row no-gutters>
+      <v-col
+        md="5"
+        class="pr-2"
+      >
+        <v-text-field
+          v-model="labelInput"
+          label="Метка"
+          :error-messages="errors.labels"
+          :counter="50"
+          @blur="onBlur('labels')"
+        />
+      </v-col>
+      <v-col
+        md="2"
+        class="pr-2"
+      >
+        <v-select
+          v-model="account.type"
+          label="Тип записи"
+          :items="accountSelectTypes"
+          @update:model-value="emit('update', account)"
+        />
+      </v-col>
+      <v-col
+        :md="account.type === 'local' ? 2 : 4"
+        class="pr-2"
+      >
+        <v-text-field
+          v-model="account.login"
+          label="Логин"
+          :counter="100"
+          :error-messages="errors.login"
+          @blur="onBlur('login')"
+        />
+      </v-col>
+      <v-col
+        md="2"
+        class="pr-2"
+        v-if="account.type === 'local'"
+      >
+        <v-text-field
+          v-model="account.password"
+          label="Пароль"
+          :counter="100"
+          :type="showPassword ? 'text' : 'password'"
+          :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+          @click:append-inner="showPassword = !showPassword"
+          :error-messages="errors.password"
+          @blur="onBlur('password')"
+        />
+      </v-col>
+      <v-col
+        md="1"
+        class="pr-2"
+        align="center"
+      >
+        <v-btn
+          variant="flat"
+          @click="emit('delete', account.id)"
+          icon="mdi-trash-can-outline"
+        />
+      </v-col>
     </v-row>
   </v-card>
 </template>
@@ -76,7 +104,20 @@
     if (field === 'labels') parseLabel()
 
     touchedInputs.value[field] = true
-    emit('update', account.value)
+
+    if (validateAccount()) {
+      emit('update', account.value)
+    } else {
+      if (field === 'labels') {
+        errors.value.labels = getLabelErrors()
+      }
+      if (field === 'login') {
+        errors.value.login = getLoginErrors()
+      }
+      if (field === 'password') {
+        errors.value.password = getPasswordErrors(a)
+      }
+    }
   }
 
   function parseLabel() {
@@ -90,4 +131,46 @@
     { title: 'LDAP', value: 'ldap' },
     { title: 'Локальная', value: 'local' }
   ]
+
+  function getLabelErrors() {
+    const labellString = account.value.labels.map((label) => label.text).join('; ')
+
+    return labellString.length > 50 ? ['Максимум 50 символов'] : []
+  }
+
+  function getLoginErrors() {
+    const login = account.value.login
+
+    if (!login.trim()) return ['Логин обязателен']
+    if (login.length > 100) return ['Максимум 100 символов']
+    return []
+  }
+
+  function getPasswordErrors() {
+    const password = account.value.password
+
+    if (!password.trim()) return ['Пароль обязателен']
+    if (password.length > 100) return ['Максимум 100 символов']
+    return []
+  }
+
+  function validateAccount() {
+    if (
+      account.value.type === 'ldap' &&
+      getLabelErrors().length === 0 &&
+      getLoginErrors().length === 0
+    ) {
+      account.value.isValidate = true
+      return true
+    }
+
+    if (
+      getLabelErrors().length === 0 &&
+      getLoginErrors().length === 0 &&
+      getPasswordErrors().length === 0
+    ) {
+      account.value.isValidate = true
+      return true
+    }
+  }
 </script>

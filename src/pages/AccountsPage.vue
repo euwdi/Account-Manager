@@ -56,6 +56,8 @@
 
 <style lang="scss" scoped>
   .page-container {
+    width: 100%;
+
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -73,16 +75,16 @@
     }
 
     .info {
-      padding: 2px;
+      padding: 4px;
       display: flex;
       align-items: center;
       gap: 10px;
       background-color: #ecf2f9;
-      border-radius: 4px;
+      border-radius: 6px;
 
       svg {
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
       }
     }
 
@@ -105,9 +107,6 @@
         width: 20px;
         height: 20px;
       }
-    }
-
-    .accounts {
     }
   }
 </style>
